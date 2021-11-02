@@ -1,13 +1,24 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { deleteMovie } from '../actions/movieActions';
+import { addFavorites } from '../actions/favoriteActions';
 
 const Movie = (props) => {
     const { id } = useParams();
     const { push } = useHistory();
-
-    const movies = [];
+    const { movies, displayFavorites } = props;
     const movie = movies.find(movie=>movie.id===Number(id));
     
+    const handleDelete = (movieId) => {
+        props.deleteMovie(movieId);
+        push('/movies')
+    }
+
+    const handleAddFavorites = (movie) => {
+        props.addFavorites(movie)
+    }
+
     return(<div className="modal-page col">
         <div className="modal-dialog">
             <div className="modal-content">
@@ -37,8 +48,12 @@ const Movie = (props) => {
                         </section>
                         
                         <section>
-                            <span className="m-2 btn btn-dark">Favorite</span>
-                            <span className="delete"><input type="button" className="m-2 btn btn-danger" value="Delete"/></span>
+                            {
+                                displayFavorites ?
+                                <span className="m-2 btn btn-dark" onClick={() => handleAddFavorites(movie)}>Favorite</span>
+                                : <></>
+                            }
+                            <span className="delete"><input type="button" className="m-2 btn btn-danger" value="Delete" onClick={()=> handleDelete(movie.id)}/></span>
                         </section>
                     </div>
                 </div>
@@ -47,4 +62,11 @@ const Movie = (props) => {
     </div>);
 }
 
-export default Movie;
+
+const mapStateToProps = (state) => {
+    return {
+        movies: state.movieState.movies,
+        displayFavorites: state.favoriteState.displayFavorites
+    }
+}
+export default connect(mapStateToProps, { deleteMovie, addFavorites })(Movie);
